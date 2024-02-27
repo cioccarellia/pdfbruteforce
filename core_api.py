@@ -69,10 +69,10 @@ def decrypt_pdf(input_path, output_path, generator):
                         return
                     except FileNotDecryptedError as unsuccessful_decryption:
                         if param_verbose_output:
-                            logging.warning(f"--> Decryption attempt unsuccessful: guess={guess}")
+                            logging.warning(f"[{input_path}]: Decryption attempt unsuccessful: guess={guess}")
                         continue
                     except Exception as generic_exception:
-                        logging.error(f"--> Unknown error: {generic_exception}")
+                        logging.error(f"[{input_path}]: Unknown error: {generic_exception}")
                         return
 
                 logging.error(f"[{input_path}]: Decryption unsuccessful, password was not in the guess space")
