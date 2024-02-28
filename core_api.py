@@ -63,13 +63,15 @@ def decrypt_pdf(input_path, output_path, generator):
                 logging.info(f"[{input_path}]: Starting decryption, using {generator=}, {guess_space_size=}")
 
                 widgets = [
+                    input_path,
                     ' ', progressbar.Percentage(),
                     ' ', progressbar.GranularBar(),
                     ' ', progressbar.ETA(),
                     ',  ', progressbar.Variable("guess", precision=30),
+
                 ]
 
-                bar = progressbar.ProgressBar(widgets=widgets, max_value=guess_space_size)
+                bar = progressbar.ProgressBar(widgets=widgets, max_value=guess_space_size, term_width=120 + len(input_path))
                 bar.start()
 
                 for guess in generator:
@@ -158,7 +160,7 @@ def decrypt_files_in_directory(directory, generator):
                 executor.submit(
                     decrypt_pdf,
                     os.path.join(directory, filename_pdf),
-                    os.path.join(directory, f"pypbf_decrypted_{filename_pdf}"),
+                    os.path.join(directory, f"pypf_decrypted_{filename_pdf}"),
                     generator
                 ) for filename_pdf in dir_files_pdfs
             ]
@@ -167,7 +169,7 @@ def decrypt_files_in_directory(directory, generator):
             #     executor.submit(
             #         decrypt_pdf,
             #         os.path.join(directory, filename_pdf),
-            #         os.path.join(directory, f"pypbf_decrypted_{filename_pdf}"),
+            #         os.path.join(directory, f"pypf_decrypted_{filename_pdf}"),
             #         generator
             #     ) for filename_pdf in dir_files_pdfs  # if filename_pdf.endswith(pdf_ext)
             # }
