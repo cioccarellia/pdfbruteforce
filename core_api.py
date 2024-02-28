@@ -114,6 +114,8 @@ def decrypt_pdf(input_path, output_path, generator, param_verbose_output = False
                             pdf_writer.add_page(pdf_reader.pages[page_num])
 
                         # We decrypted the file!
+                        bar.update(1)
+                        bar.max_value = 1
                         bar.finish()
 
                         # Create new decrypted file
@@ -150,6 +152,8 @@ def decrypt_pdf(input_path, output_path, generator, param_verbose_output = False
                             logging.warning(f"[{input_path}]: Decryption attempt unsuccessful: guess={guess}")
                         continue
                     except Exception as generic_exception:
+                        bar.update(1)
+                        bar.max_value = 1
                         bar.finish()
                         logging.error(f"[{input_path}]: Unknown error: {generic_exception}")
                         return
