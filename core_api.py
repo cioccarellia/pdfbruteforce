@@ -1,3 +1,4 @@
+import math
 import os
 import time
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, wait
@@ -16,8 +17,6 @@ def current_milli_time():
     return round(time.perf_counter() * 1000)
 
 
-param_verbose_output = False
-param_remove_file_after_decryption = False
 
 const_mode_rb = 'rb'
 const_mode_wb = 'wb'
@@ -58,7 +57,17 @@ class DecryptedMetadata:
                f"search_space_size={self.search_space_size})"
 
 
-def decrypt_pdf(input_path, output_path, generator):
+
+def compute_size(generator):
+    if generator is range:
+        # We know the exact range
+        return len(generator)
+    else:
+        # Computationally infeasible to compute spacesize, usually huge
+        return math.inf
+
+
+def decrypt_pdf(input_path, output_path, generator, param_verbose_output = False, param_remove_file_after_decryption = False):
     # Open pdf file
 
     try:
@@ -74,7 +83,7 @@ def decrypt_pdf(input_path, output_path, generator):
             if pdf_reader.is_encrypted:
                 # Explore guess space
                 guess_count = 0
-                guess_space_size = len(generator)
+                guess_space_size = compute_size(generator)
 
                 logging.info(f"[{input_path}]: Starting decryption, using {generator=}, {guess_space_size=}")
 
@@ -159,12 +168,9 @@ def decrypt_pdf(input_path, output_path, generator):
         return None
 
 
-param_multidecrypt_randomize_dirlist = False
-param_multidecrypt_multithreaded = True
-
 
 # Function to decrypt each PDF file in the directory
-def decrypt_files_in_directory(directory, generator):
+def decrypt_all_in_directory(directory, generator, param_multidecrypt_randomize_dirlist = False, param_multidecrypt_multithreaded = True):
     # Get all files in directory
     dir_files_all = os.listdir(directory)
 
@@ -183,6 +189,7 @@ def decrypt_files_in_directory(directory, generator):
         with ProcessPoolExecutor(max_workers=processes) as executor:
             # Use the executor to submit tasks for each file
 
+            # noinspection PyTypeChecker
             future_tasks = [
                 executor.submit(
                     decrypt_pdf,

@@ -4,9 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9feb7fd5-b61d-4df1-be1a-84f7a15f99df" name="Changes" comment="Finished bar &amp; mt support with async multiprocessing">
+    <list default="true" id="9feb7fd5-b61d-4df1-be1a-84f7a15f99df" name="Changes" comment="MIDA">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core_api.py" beforeDir="false" afterPath="$PROJECT_DIR$/core_api.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pdfbruteforce.py" beforeDir="false" afterPath="$PROJECT_DIR$/pdfbruteforce.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -128,7 +129,7 @@
       <workItem from="1708982054175" duration="1705000" />
       <workItem from="1709034804981" duration="2940000" />
       <workItem from="1709038658396" duration="51000" />
-      <workItem from="1709125905711" duration="7977000" />
+      <workItem from="1709125905711" duration="8810000" />
     </task>
     <task id="LOCAL-00001" summary="Actual commit">
       <option name="closed" value="true" />
@@ -170,7 +171,15 @@
       <option name="project" value="LOCAL" />
       <updated>1709135793557</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="MIDA">
+      <option name="closed" value="true" />
+      <created>1709139276616</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1709139276616</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -182,10 +191,11 @@
     <MESSAGE value="logging" />
     <MESSAGE value="Added progress bar &amp; realtime counter, multithreading support wip" />
     <MESSAGE value="Finished bar &amp; mt support with async multiprocessing" />
-    <option name="LAST_COMMIT_MESSAGE" value="Finished bar &amp; mt support with async multiprocessing" />
+    <MESSAGE value="MIDA" />
+    <option name="LAST_COMMIT_MESSAGE" value="MIDA" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/pdfbruteforce$main.coverage" NAME="main Coverage Results" MODIFIED="1708992331143" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/pdfbruteforce$pdfbruteforce.coverage" NAME="pdfbruteforce Coverage Results" MODIFIED="1709139110055" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pdfbruteforce$pdfbruteforce.coverage" NAME="pdfbruteforce Coverage Results" MODIFIED="1709140273768" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

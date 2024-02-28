@@ -1,18 +1,19 @@
 import logging
+import string
 
-from core_api import decrypt_files_in_directory, decrypt_pdf
+from core_api import decrypt_all_in_directory, decrypt_pdf
 from generators.alphanumeric import gen_alphanumeric
 from generators.numeric import gen_numeric
 
 
 def main():
-    single = False
+    single = True
 
     if single:
         decrypt_pdf(
             "hal-00761669---736472.pdf",
             "sample/pybf_decrypted_hal-00761669---736472.pdf",
-            gen_numeric(700000, 740000)
+            gen_alphanumeric(string.digits, 6)
         )
 
         decrypt_pdf(
@@ -22,7 +23,7 @@ def main():
         )
     else:
 
-        decrypt_files_in_directory(
+        decrypt_all_in_directory(
             "sample",
             generator=gen_numeric(0, 100_000)
         )
