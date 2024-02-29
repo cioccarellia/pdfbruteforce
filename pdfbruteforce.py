@@ -11,16 +11,11 @@ def main():
 
     if single:
         decrypt_pdf(
-            "hal-00761669---736472.pdf",
-            "sample/pybf_decrypted_hal-00761669---736472.pdf",
-            gen_alphanumeric(string.digits, 6)
+            "sample/parolo/aiutino.pdf",
+            "verifica.pdf",
+            gen_alphanumeric(['password', 'non', 'corretta'], 3)
         )
 
-        decrypt_pdf(
-            "sample/fb0f00c4---11111.pdf",
-            "sample/pybf_decrypted_hal-00761669---736472.pdf",
-            gen_numeric(0, 1000000)
-        )
     else:
 
         decrypt_all_in_directory(
