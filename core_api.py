@@ -1,7 +1,6 @@
 import math
 import os
-import time
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, wait
+from concurrent.futures import ProcessPoolExecutor, wait
 from enum import Enum
 from random import shuffle
 import logging
@@ -13,9 +12,8 @@ import time
 import progressbar
 
 
-def current_milli_time():
+def current_time_ms():
     return round(time.perf_counter() * 1000)
-
 
 
 const_mode_rb = 'rb'
@@ -40,6 +38,7 @@ class DecryptionProcessResult:
                f"decryption_status='{self.decryption_status}', " \
                f"decryption_metadata={self.decryption_metadata})"
 
+
 class DecryptedMetadata:
     def __init__(self, decrypted_filepath, password, elapsed_time_seconds, attempts, search_space_size):
         self.decrypted_filepath = decrypted_filepath
@@ -57,8 +56,7 @@ class DecryptedMetadata:
                f"search_space_size={self.search_space_size})"
 
 
-
-def compute_size(generator):
+def compute_generator_size(generator):
     if generator is range:
         # We know the exact range
         return len(generator)
@@ -67,14 +65,59 @@ def compute_size(generator):
         return math.inf
 
 
-def decrypt_pdf(input_path, output_path, generator, param_verbose_output = False, param_remove_file_after_decryption = False):
+def decrypt_pdf(input_path,
+                output_path,
+                generator,
+                param_verbose_output=False,
+                param_remove_file_after_decryption=False,
+                param_show_progress_bar=True):
     # Open pdf file
+
+    def pb_init(guess_space_size):
+        if param_show_progress_bar:
+            widgets = [
+                input_path,
+                ' ', progressbar.Percentage(),
+                ' ', progressbar.GranularBar(),
+                ' ', progressbar.ETA(),
+                ',  ', progressbar.Variable("iguess", precision=30),
+
+            ]
+
+            bar = progressbar.ProgressBar(widgets=widgets, max_value=guess_space_size,
+                                          term_width=120 + len(input_path))
+            bar.start()
+            return bar
+
+    def pb_increment(bar, guess, guess_count):
+        if param_show_progress_bar:
+            bar.update(guess_count, iguess=str(guess))
+
+    def pb_destroy(bar):
+        if param_show_progress_bar:
+            bar.update(1)
+            bar.max_value = 1
+            bar.finish()
+
+
+    def msg_successful_decryption(password):
+        logging.info(f"[{input_path}]: Decryption successful, {password=}, length={len(password)}.")
+
+    def msg_decryption_statistics(new_filename, elapsed_s, guess_count, guess_space_size):
+        logging.info(
+            f"[{input_path}]: Decrypted file saved as {new_filename}. "
+            f"Took {elapsed_s}s.")
+
+        if guess_space_size != math.inf:
+            logging.info(f"[{input_path}]: Explored {guess_count} guesses out of {guess_space_size} ({guess_count / guess_space_size}% coverage)")
+
 
     try:
         with open(input_path, const_mode_rb) as file:
-
             # File exists and we can read it
-            initial_time_ms = current_milli_time()
+            initial_time_ms = current_time_ms()
+            has_found_password = False
+            password = None
 
             # Open file with PyPDF
             pdf_reader = PyPDF2.PdfReader(file)
@@ -83,27 +126,17 @@ def decrypt_pdf(input_path, output_path, generator, param_verbose_output = False
             if pdf_reader.is_encrypted:
                 # Explore guess space
                 guess_count = 0
-                guess_space_size = compute_size(generator)
+                guess_space_size = compute_generator_size(generator)
 
                 logging.info(f"[{input_path}]: Starting decryption, using {generator=}, {guess_space_size=}")
 
-                widgets = [
-                    input_path,
-                    ' ', progressbar.Percentage(),
-                    ' ', progressbar.GranularBar(),
-                    ' ', progressbar.ETA(),
-                    ',  ', progressbar.Variable("guess", precision=30),
-
-                ]
-
-                bar = progressbar.ProgressBar(widgets=widgets, max_value=guess_space_size, term_width=120 + len(input_path))
-                bar.start()
+                bar = pb_init(guess_space_size)
 
                 for guess in generator:
                     try:
                         # Updates our guess count
                         guess_count += 1
-                        bar.update(guess_count, guess=str(guess))
+                        pb_increment(bar, guess_count, guess)
 
                         # Attempt to decrypt PDF with the current guess
                         pdf_reader.decrypt(str(guess))
@@ -114,9 +147,9 @@ def decrypt_pdf(input_path, output_path, generator, param_verbose_output = False
                             pdf_writer.add_page(pdf_reader.pages[page_num])
 
                         # We decrypted the file!
-                        bar.update(1)
-                        bar.max_value = 1
-                        bar.finish()
+                        has_found_password = True
+                        password = guess
+                        pb_destroy(bar)
 
                         # Create new decrypted file
                         new_filename = output_path + "." + str(guess) + const_pdf_ext
@@ -132,10 +165,12 @@ def decrypt_pdf(input_path, output_path, generator, param_verbose_output = False
                             os.remove(input_path)
 
                         # Calculate elapsed time
-                        elapsed_ms = current_milli_time() - initial_time_ms
+                        elapsed_ms = current_time_ms() - initial_time_ms
                         elapsed_s = elapsed_ms / 1000
 
-                        logging.info(f"[{input_path}]: Decryption successful, password={guess}. Decrypted file saved as {new_filename}. Took {elapsed_s}s. Explored {guess_count} guesses out of {guess_space_size} ({guess_count/guess_space_size}% coverage)")
+                        msg_successful_decryption(password)
+                        msg_decryption_statistics(new_filename, elapsed_s, guess_count, guess_space_size)
+
                         return DecryptionProcessResult(
                             input_path,
                             DecryptionStatus.DECRYPTED,
@@ -147,18 +182,24 @@ def decrypt_pdf(input_path, output_path, generator, param_verbose_output = False
                                 guess_space_size
                             )
                         )
-                    except FileNotDecryptedError as unsuccessful_decryption:
+                    except FileNotDecryptedError as unsuccessful_decryption_wrong_password:
+                        # Wrong password
                         if param_verbose_output:
-                            logging.warning(f"[{input_path}]: Decryption attempt unsuccessful: guess={guess}")
+                            logging.warning(
+                                f"[{input_path}]: Decryption attempt unsuccessful: guess={guess}, error={unsuccessful_decryption_wrong_password}")
                         continue
                     except Exception as generic_exception:
-                        bar.update(1)
-                        bar.max_value = 1
-                        bar.finish()
-                        logging.error(f"[{input_path}]: Unknown error: {generic_exception}")
+                        # Unknown error
+                        pb_destroy(bar)
+
+                        if has_found_password:
+                            msg_successful_decryption(password)
+
+                        logging.error(f"[{input_path}]: Unknown error while decrypting file: {generic_exception}")
                         return
 
                 # Password not found
+                pb_destroy(bar)
                 logging.error(f"[{input_path}]: Decryption unsuccessful, password was not in the guess space")
                 return
             else:
@@ -168,13 +209,18 @@ def decrypt_pdf(input_path, output_path, generator, param_verbose_output = False
         logging.error(f"[{input_path}]: File not found.")
         return None
     except OSError:
-        logging.error(f"[{input_path}]: File could not be opened.")
+        logging.error(f"[{input_path}]: File could not be opened (check read permissions).")
         return None
 
 
-
 # Function to decrypt each PDF file in the directory
-def decrypt_all_in_directory(directory, generator, param_multidecrypt_randomize_dirlist = False, param_multidecrypt_multithreaded = True):
+def decrypt_all_in_directory(directory,
+                             generator,
+                             param_multidecrypt_randomize_dirlist=False,
+                             param_multidecrypt_multithreaded=True,
+                             param_verbose_output=False,
+                             param_remove_file_after_decryption=False,
+                             param_show_progress_bar=True):
     # Get all files in directory
     dir_files_all = os.listdir(directory)
 
@@ -193,36 +239,30 @@ def decrypt_all_in_directory(directory, generator, param_multidecrypt_randomize_
         with ProcessPoolExecutor(max_workers=processes) as executor:
             # Use the executor to submit tasks for each file
 
-            # noinspection PyTypeChecker
             future_tasks = [
                 executor.submit(
                     decrypt_pdf,
                     os.path.join(directory, filename_pdf),
                     os.path.join(directory, f"pybf_decrypted_{filename_pdf}"),
-                    generator
+                    generator,
+                    param_verbose_output=param_verbose_output,
+                    param_remove_file_after_decryption=param_remove_file_after_decryption,
+                    param_show_progress_bar=param_show_progress_bar
                 ) for filename_pdf in dir_files_pdfs
             ]
-
-            # futures = {
-            #     executor.submit(
-            #         decrypt_pdf,
-            #         os.path.join(directory, filename_pdf),
-            #         os.path.join(directory, f"pypf_decrypted_{filename_pdf}"),
-            #         generator
-            #     ) for filename_pdf in dir_files_pdfs  # if filename_pdf.endswith(pdf_ext)
-            # }
 
             # Wait for all tasks to complete
             wait(future_tasks)
 
             for future in future_tasks:
                 try:
-                    result = future.result()
-                    if result is not None:
-                        if result.decryption_status == DecryptionStatus.DECRYPTED:
-                            logging.info(result.decryption_metadata)
+                    computation_result = future.result()
+
+                    if computation_result is not None:
+                        if computation_result.decryption_status == DecryptionStatus.DECRYPTED:
+                            logging.info(computation_result.decryption_metadata)
                         else:
-                            logging.warning(result)
+                            logging.warning(computation_result)
 
                 except Exception as future_error:
                     logging.error(f"Multithreading error: {future_error}")

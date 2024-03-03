@@ -4,7 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9feb7fd5-b61d-4df1-be1a-84f7a15f99df" name="Changes" comment="Fixed inf into nan" />
+    <list default="true" id="9feb7fd5-b61d-4df1-be1a-84f7a15f99df" name="Changes" comment="Todo: autoincrementing generated length for dictionary progressive search">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core_api.py" beforeDir="false" afterPath="$PROJECT_DIR$/core_api.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/generators/alphanumeric.py" beforeDir="false" afterPath="$PROJECT_DIR$/generators/alphanumeric.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pdfbruteforce.py" beforeDir="false" afterPath="$PROJECT_DIR$/pdfbruteforce.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -129,6 +134,8 @@
       <workItem from="1709034804981" duration="2940000" />
       <workItem from="1709038658396" duration="51000" />
       <workItem from="1709125905711" duration="9787000" />
+      <workItem from="1709165895195" duration="247000" />
+      <workItem from="1709418423894" duration="2669000" />
     </task>
     <task id="LOCAL-00001" summary="Actual commit">
       <option name="closed" value="true" />
@@ -194,7 +201,15 @@
       <option name="project" value="LOCAL" />
       <updated>1709141429289</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Todo: autoincrementing generated length for dictionary progressive search">
+      <option name="closed" value="true" />
+      <created>1709166112851</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1709166112851</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -209,10 +224,11 @@
     <MESSAGE value="MIDA" />
     <MESSAGE value="Adapted alphanumeric bruteforcing to spacesize computations" />
     <MESSAGE value="Fixed inf into nan" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixed inf into nan" />
+    <MESSAGE value="Todo: autoincrementing generated length for dictionary progressive search" />
+    <option name="LAST_COMMIT_MESSAGE" value="Todo: autoincrementing generated length for dictionary progressive search" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/pdfbruteforce$main.coverage" NAME="main Coverage Results" MODIFIED="1708992331143" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/pdfbruteforce$pdfbruteforce.coverage" NAME="pdfbruteforce Coverage Results" MODIFIED="1709141409468" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pdfbruteforce$pdfbruteforce.coverage" NAME="pdfbruteforce Coverage Results" MODIFIED="1709422411157" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
