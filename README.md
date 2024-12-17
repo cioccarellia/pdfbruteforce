@@ -1,4 +1,16 @@
 # pdfbruteforce
 
+A tiny and simple python utility to bruteforce PDF files
 
-pip install pycryptodome==3.15.0
+Targets:
+- File (single)
+- Directory (batched)
+
+Generators:
+- Numeric (code range)
+- Dictionary (wordlist + size)
+
+Requirements:
+```shell
+pip install PyPDF2 progressbar2 pycryptodome==3.15.0
+```

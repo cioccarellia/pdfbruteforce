@@ -57,7 +57,7 @@ class DecryptedMetadata:
 
 
 def compute_generator_size(generator):
-    if generator is range:
+    if isinstance(generator, range):
         # We know the exact range
         return len(generator)
     else:
@@ -80,7 +80,7 @@ def decrypt_pdf(input_path,
                 ' ', progressbar.Percentage(),
                 ' ', progressbar.GranularBar(),
                 ' ', progressbar.ETA(),
-                ',  ', progressbar.Variable("iguess", precision=30),
+                ',  ', progressbar.Variable("guess", precision=30),
 
             ]
 
@@ -91,7 +91,7 @@ def decrypt_pdf(input_path,
 
     def pb_increment(bar, guess, guess_count):
         if param_show_progress_bar:
-            bar.update(guess_count, iguess=str(guess))
+            bar.update(guess_count, guess=str(guess))
 
     def pb_destroy(bar):
         if param_show_progress_bar:
@@ -105,11 +105,12 @@ def decrypt_pdf(input_path,
 
     def msg_decryption_statistics(new_filename, elapsed_s, guess_count, guess_space_size):
         logging.info(
-            f"[{input_path}]: Decrypted file saved as {new_filename}. "
-            f"Took {elapsed_s}s.")
+            f"[{input_path}]: Decrypted file saved to {new_filename}; "
+            f"took {elapsed_s}s.")
 
         if guess_space_size != math.inf:
-            logging.info(f"[{input_path}]: Explored {guess_count} guesses out of {guess_space_size} ({guess_count / guess_space_size}% coverage)")
+            coverage_percent = guess_count / guess_space_size
+            logging.info(f"[{input_path}]: Explored {guess_count} guesses out of {guess_space_size} ({coverage_percent * 100}% guess space covered)")
 
 
     try:
@@ -132,14 +133,16 @@ def decrypt_pdf(input_path,
 
                 bar = pb_init(guess_space_size)
 
-                for guess in generator:
+                for gen_guess in generator:
                     try:
                         # Updates our guess count
                         guess_count += 1
-                        pb_increment(bar, guess_count, guess)
+                        str_guess = str(gen_guess)
+
+                        pb_increment(bar, str_guess, guess_count)
 
                         # Attempt to decrypt PDF with the current guess
-                        pdf_reader.decrypt(str(guess))
+                        pdf_reader.decrypt(str_guess)
                         pdf_writer = PyPDF2.PdfWriter()
 
                         # Save all pages
@@ -148,11 +151,11 @@ def decrypt_pdf(input_path,
 
                         # We decrypted the file!
                         has_found_password = True
-                        password = guess
+                        password = str_guess
                         pb_destroy(bar)
 
                         # Create new decrypted file
-                        new_filename = output_path + "." + str(guess) + const_pdf_ext
+                        new_filename = output_path + "." + str_guess + const_pdf_ext
                         with open(new_filename, const_mode_wb) as decrypted_file:
                             pdf_writer.write(decrypted_file)
 
@@ -176,7 +179,7 @@ def decrypt_pdf(input_path,
                             DecryptionStatus.DECRYPTED,
                             DecryptedMetadata(
                                 new_filename,
-                                guess,
+                                str_guess,
                                 elapsed_s,
                                 guess_count,
                                 guess_space_size
@@ -186,16 +189,17 @@ def decrypt_pdf(input_path,
                         # Wrong password
                         if param_verbose_output:
                             logging.warning(
-                                f"[{input_path}]: Decryption attempt unsuccessful: guess={guess}, error={unsuccessful_decryption_wrong_password}")
+                                f"[{input_path}]: Decryption attempt unsuccessful: guess={str_guess}, error={unsuccessful_decryption_wrong_password}")
                         continue
                     except Exception as generic_exception:
                         # Unknown error
                         pb_destroy(bar)
 
+                        logging.error(f"[{input_path}]: Unknown error while decrypting file: {generic_exception}")
+
                         if has_found_password:
                             msg_successful_decryption(password)
 
-                        logging.error(f"[{input_path}]: Unknown error while decrypting file: {generic_exception}")
                         return
 
                 # Password not found
